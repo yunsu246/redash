@@ -139,7 +139,9 @@ class Oracle(BaseSQLQueryRunner):
         connection = cx_Oracle.connect(
             user=self.configuration["user"],
             password=self.configuration["password"],
-            dsn=dsn,
+            dsn=dsn, 
+            encoding="UTF-8", 
+            nencoding="UTF-8",
         )
         connection.outputtypehandler = Oracle.output_handler
 

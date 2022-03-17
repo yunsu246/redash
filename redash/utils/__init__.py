@@ -15,7 +15,7 @@ import pytz
 import simplejson
 import sqlparse
 from flask import current_app
-from funcy import select_values
+from funcy import distinct, select_values
 from redash import settings
 from sqlalchemy.orm.query import Query
 
@@ -169,6 +169,24 @@ class UnicodeWriter:
     def writerows(self, rows):
         for row in rows:
             self.writerow(row)
+
+
+def _collect_key_names(nodes):
+    keys = []
+    for node in nodes._parse_tree:
+        if isinstance(node, pystache.parser._EscapeNode):
+            keys.append(node.key)
+        elif isinstance(node, pystache.parser._SectionNode):
+            keys.append(node.key)
+            keys.extend(_collect_key_names(node.parsed))
+
+    return distinct(keys)
+
+
+def collect_query_parameters(query):
+    nodes = pystache.parse(query)
+    keys = _collect_key_names(nodes)
+    return keys
 
 
 def collect_parameters_from_request(args):
